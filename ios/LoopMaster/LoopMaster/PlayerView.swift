@@ -131,7 +131,7 @@ struct PlayerView: View {
 
     private func cargarAudioInicial() {
         do {
-            try motor.cargarAudioDelBundle(nombre: "sample", extensión: "m4a")
+            try motor.cargarAudioDelBundle(nombre: "Ansioso", extensión: "m4a")
         } catch {
             mensajeError = error.localizedDescription
         }
