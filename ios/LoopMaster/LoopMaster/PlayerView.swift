@@ -38,7 +38,7 @@ struct PlayerView: View {
                 .foregroundStyle(.secondary)
             Text(motor.nombreArchivoCargado.isEmpty ? "—" : motor.nombreArchivoCargado)
                 .font(.headline)
-            Text(String(format: "Duración: %.1f s", motor.duracionSegundos))
+            Text("Duración: \(formateoDuracion(motor.duracionSegundos))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -79,7 +79,7 @@ struct PlayerView: View {
             Slider(value: Binding(
                 get: { Double(motor.tempo) },
                 set: { motor.tempo = Float($0) }
-            ), in: 50...200, step: 1)
+            ), in: 50...150, step: 1)
             .accessibilityLabel("Tempo en porcentaje")
             .accessibilityValue("\(Int(motor.tempo)) por ciento")
             Text("Cambia la velocidad sin alterar el tono.")
@@ -141,6 +141,13 @@ struct PlayerView: View {
         let entero = Int(valor)
         if entero == 0 { return "±0" }
         return entero > 0 ? "+\(entero)" : "\(entero)"
+    }
+
+    private func formateoDuracion(_ segundos: Double) -> String {
+        let total = Int(segundos)
+        let minutos = total / 60
+        let segs = total % 60
+        return String(format: "%d:%02d", minutos, segs)
     }
 }
 

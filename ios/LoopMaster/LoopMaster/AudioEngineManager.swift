@@ -17,7 +17,7 @@ final class AudioEngineManager {
 
     var tempo: Float = 100 {
         didSet {
-            timePitch.rate = max(0.25, min(2.0, tempo / 100))
+            timePitch.rate = max(0.5, min(1.5, tempo / 100))
         }
     }
 
