@@ -10,7 +10,7 @@ Proyecto del Grado Superior en Desarrollo de Aplicaciones Multiplataforma (DAM),
 
 **Entrega inicial.** Fase temprana de desarrollo. Ya son funcionales:
 
-- Cliente iOS: reproductor de audio con control independiente de **tempo (50–200 %)** y **tono (±12 semitonos)** usando `AVAudioEngine` + `AVAudioUnitTimePitch`. Play / pausa / stop. Audio de muestra incluido en el bundle.
+- Cliente iOS: reproductor de audio con control independiente de **tempo (25–175 %)** y **tono (±12 semitonos)** usando `AVAudioEngine` + `AVAudioUnitTimePitch`. Play / pausa / stop. Audio de muestra incluido en el bundle.
 - Backend: API REST completa para la entidad `Cancion` (`GET`, `POST`, `PUT`, `DELETE`). Entidades `Carpeta` (N:M con `Cancion`) y `Bucle` (1:N desde `Cancion`) modeladas en JPA, listas para recibir endpoints propios en siguientes iteraciones.
 
 Lo pendiente está descrito en la sección *Roadmap* al final.
@@ -173,7 +173,7 @@ En Xcode:
 #### Qué puedes probar
 
 - Pulsa el botón grande de **Play** ▶ para iniciar la reproducción del audio de muestra (*Ansioso M*, Ramiro Barrios — En vivo en Assejazz Sevilla, grabación propia incluida con permiso del autor).
-- Mueve el slider de **Tempo** hacia la izquierda (50 %) y verás que el audio suena mucho más lento **sin cambiar el tono**. Hacia la derecha (200 %) suena al doble de velocidad, igualmente sin cambiar el tono.
+- Mueve el slider de **Tempo** hacia la izquierda (25 %) y verás que el audio suena mucho más lento **sin cambiar el tono**. Hacia la derecha (175 %) suena bastante más rápido, igualmente sin cambiar el tono.
 - Mueve el slider de **Tono** hacia abajo (−12 semitonos) y el audio sonará una octava más grave **sin cambiar la velocidad**. Hacia arriba (+12) suena una octava más agudo.
 - El botón de **Stop** detiene y rebobina al principio.
 

@@ -79,7 +79,7 @@ struct PlayerView: View {
             Slider(value: Binding(
                 get: { Double(motor.tempo) },
                 set: { motor.tempo = Float($0) }
-            ), in: 50...150, step: 1)
+            ), in: 25...175, step: 1)
             .accessibilityLabel("Tempo en porcentaje")
             .accessibilityValue("\(Int(motor.tempo)) por ciento")
             Text("Cambia la velocidad sin alterar el tono.")
