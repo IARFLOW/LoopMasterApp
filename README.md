@@ -196,5 +196,5 @@ Esta entrega inicial cubre los requisitos mínimos exigidos para la primera entr
 
 ## Autor
 
-Ignacio Ampurdanés Ruz — 2º DAM, IES Fernando Wirtz Suárez, A Coruña. Curso 2025–2026.
+Ignacio Ampurdanés Ruz — 2º DAM, IES Fernando Wirtz Suárez, A Coruña. Curso 2025–2026.\
 Tutor: Noé Vila Muñoz.
