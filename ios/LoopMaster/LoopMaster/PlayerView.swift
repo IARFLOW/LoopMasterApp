@@ -1,9 +1,11 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct PlayerView: View {
 
     @State private var motor = AudioEngineManager()
     @State private var mensajeError: String?
+    @State private var mostrandoSelector = false
 
     var body: some View {
         NavigationStack {
@@ -19,6 +21,8 @@ struct PlayerView: View {
                 controlPitch
 
                 Spacer()
+
+                botonCargarArchivo
             }
             .padding()
             .navigationTitle("LoopMaster")
@@ -28,6 +32,12 @@ struct PlayerView: View {
             } message: {
                 Text(mensajeError ?? "")
             }
+            .fileImporter(
+                isPresented: $mostrandoSelector,
+                allowedContentTypes: [.audio],
+                allowsMultipleSelection: false,
+                onCompletion: gestionarSeleccionArchivo
+            )
         }
     }
 
@@ -110,6 +120,19 @@ struct PlayerView: View {
         }
     }
 
+    private var botonCargarArchivo: some View {
+        Button {
+            mostrandoSelector = true
+        } label: {
+            Label("Cargar archivo de audio", systemImage: "folder.badge.plus")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.accentColor.opacity(0.15), in: .rect(cornerRadius: 12))
+        }
+        .accessibilityHint("Abre el selector de archivos para escoger un audio del dispositivo.")
+    }
+
     private var errorPresentado: Binding<Bool> {
         Binding(
             get: { mensajeError != nil },
@@ -133,6 +156,20 @@ struct PlayerView: View {
         do {
             try motor.cargarAudioDelBundle(nombre: "Ansioso", extensión: "m4a")
         } catch {
+            mensajeError = error.localizedDescription
+        }
+    }
+
+    private func gestionarSeleccionArchivo(_ resultado: Result<[URL], Error>) {
+        switch resultado {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            do {
+                try motor.cargarAudioDeURL(url)
+            } catch {
+                mensajeError = error.localizedDescription
+            }
+        case .failure(let error):
             mensajeError = error.localizedDescription
         }
     }

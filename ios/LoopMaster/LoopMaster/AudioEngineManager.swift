@@ -42,9 +42,26 @@ final class AudioEngineManager {
             throw ErrorAudio.archivoNoEncontrado(nombre: "\(nombre).\(extensión)")
         }
 
+        try cargarArchivo(desde: url, nombreVisible: "\(nombre).\(extensión)")
+    }
+
+    func cargarAudioDeURL(_ url: URL) throws {
+        detener()
+
+        let necesitaScope = url.startAccessingSecurityScopedResource()
+        defer {
+            if necesitaScope {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        try cargarArchivo(desde: url, nombreVisible: url.lastPathComponent)
+    }
+
+    private func cargarArchivo(desde url: URL, nombreVisible: String) throws {
         let archivo = try AVAudioFile(forReading: url)
         self.audioFile = archivo
-        self.nombreArchivoCargado = "\(nombre).\(extensión)"
+        self.nombreArchivoCargado = nombreVisible
         let frecuenciaMuestreo = archivo.processingFormat.sampleRate
         self.duracionSegundos = Double(archivo.length) / frecuenciaMuestreo
     }
