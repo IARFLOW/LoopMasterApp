@@ -1,6 +1,8 @@
 package com.loopmaster.backend.controller;
 
-import com.loopmaster.backend.model.Cancion;
+import com.loopmaster.backend.dto.BucleDTO;
+import com.loopmaster.backend.dto.CancionDTO;
+import com.loopmaster.backend.service.BucleService;
 import com.loopmaster.backend.service.CancionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,15 +28,18 @@ public class CancionController {
     @Autowired
     private CancionService cancionService;
 
+    @Autowired
+    private BucleService bucleService;
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Cancion>> getCanciones() {
-        List<Cancion> canciones = this.cancionService.listarTodas();
+    public ResponseEntity<List<CancionDTO>> getCanciones() {
+        List<CancionDTO> canciones = this.cancionService.listarTodas();
         return ResponseEntity.ok(canciones);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Cancion> getCancionById(@PathVariable int id) {
-        Optional<Cancion> c = this.cancionService.buscarPorId(id);
+    public ResponseEntity<CancionDTO> getCancionById(@PathVariable int id) {
+        Optional<CancionDTO> c = this.cancionService.buscarPorId(id);
         if (c.isPresent()) {
             return ResponseEntity.ok(c.get());
         }
@@ -42,14 +47,14 @@ public class CancionController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Cancion> crearCancion(@RequestBody Cancion cancion) {
-        Cancion guardada = this.cancionService.crear(cancion);
+    public ResponseEntity<CancionDTO> crearCancion(@RequestBody CancionDTO datos) {
+        CancionDTO guardada = this.cancionService.crear(datos);
         return ResponseEntity.created(URI.create("/api/canciones/" + guardada.getId())).body(guardada);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Cancion> actualizarCancion(@PathVariable int id, @RequestBody Cancion datos) {
-        Optional<Cancion> actualizada = this.cancionService.actualizar(id, datos);
+    public ResponseEntity<CancionDTO> actualizarCancion(@PathVariable int id, @RequestBody CancionDTO datos) {
+        Optional<CancionDTO> actualizada = this.cancionService.actualizar(id, datos);
         if (actualizada.isPresent()) {
             return ResponseEntity.ok(actualizada.get());
         }
@@ -60,6 +65,15 @@ public class CancionController {
     public ResponseEntity<Void> eliminarCancion(@PathVariable int id) {
         if (this.cancionService.eliminar(id)) {
             return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping(value = "/{id}/bucles", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<BucleDTO>> getBuclesDeCancion(@PathVariable int id) {
+        Optional<List<BucleDTO>> bucles = this.bucleService.buclesDeCancion(id);
+        if (bucles.isPresent()) {
+            return ResponseEntity.ok(bucles.get());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }

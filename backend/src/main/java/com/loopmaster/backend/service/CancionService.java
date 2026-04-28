@@ -1,50 +1,20 @@
 package com.loopmaster.backend.service;
 
-import com.loopmaster.backend.model.Cancion;
-import com.loopmaster.backend.repository.CancionDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.loopmaster.backend.dto.CancionDTO;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class CancionService {
+public interface CancionService {
 
-    @Autowired
-    private CancionDAO cancionDAO;
+    List<CancionDTO> listarTodas();
 
-    public List<Cancion> listarTodas() {
-        return cancionDAO.findAll();
-    }
+    Optional<CancionDTO> buscarPorId(int id);
 
-    public Optional<Cancion> buscarPorId(int id) {
-        return cancionDAO.findById(id);
-    }
+    CancionDTO crear(CancionDTO datos);
 
-    public Cancion crear(Cancion cancion) {
-        return cancionDAO.save(cancion);
-    }
+    Optional<CancionDTO> actualizar(int id, CancionDTO datos);
 
-    public Optional<Cancion> actualizar(int id, Cancion datos) {
-        Optional<Cancion> existente = cancionDAO.findById(id);
-        if (existente.isPresent()) {
-            Cancion c = existente.get();
-            c.setTitulo(datos.getTitulo());
-            c.setArtista(datos.getArtista());
-            c.setDuracionSegundos(datos.getDuracionSegundos());
-            c.setNombreArchivo(datos.getNombreArchivo());
-            return Optional.of(cancionDAO.save(c));
-        }
-        return Optional.empty();
-    }
-
-    public boolean eliminar(int id) {
-        if (cancionDAO.existsById(id)) {
-            cancionDAO.deleteById(id);
-            return true;
-        }
-        return false;
-    }
+    boolean eliminar(int id);
 
 }
