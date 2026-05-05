@@ -1,53 +1,49 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct PlayerView: View {
 
+    let cancion: Cancion
+
     @State private var motor = AudioEngineManager()
     @State private var mensajeError: String?
-    @State private var mostrandoSelector = false
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 32) {
-                cabecera
+        VStack(spacing: 32) {
+            cabecera
 
-                Divider()
+            Divider()
 
-                controlesReproduccion
+            controlesReproduccion
 
-                controlTempo
+            controlTempo
 
-                controlPitch
+            controlPitch
 
-                Spacer()
-
-                botonCargarArchivo
-            }
-            .padding()
-            .navigationTitle("LoopMaster")
-            .onAppear(perform: cargarAudioInicial)
-            .alert("Error de audio", isPresented: errorPresentado) {
-                Button("OK", role: .cancel) { mensajeError = nil }
-            } message: {
-                Text(mensajeError ?? "")
-            }
-            .fileImporter(
-                isPresented: $mostrandoSelector,
-                allowedContentTypes: [.audio],
-                allowsMultipleSelection: false,
-                onCompletion: gestionarSeleccionArchivo
-            )
+            Spacer()
+        }
+        .padding()
+        .navigationTitle(cancion.titulo)
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear(perform: cargarCancion)
+        .alert("Error de audio", isPresented: errorPresentado) {
+            Button("OK", role: .cancel) { mensajeError = nil }
+        } message: {
+            Text(mensajeError ?? "")
         }
     }
 
     private var cabecera: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Archivo cargado")
+            Text("Reproduciendo")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(motor.nombreArchivoCargado.isEmpty ? "—" : motor.nombreArchivoCargado)
-                .font(.headline)
+            Text(cancion.titulo)
+                .font(.title2.bold())
+            if !cancion.artista.isEmpty {
+                Text(cancion.artista)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
             Text("Duración: \(formateoDuracion(motor.duracionSegundos))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -120,19 +116,6 @@ struct PlayerView: View {
         }
     }
 
-    private var botonCargarArchivo: some View {
-        Button {
-            mostrandoSelector = true
-        } label: {
-            Label("Cargar archivo de audio", systemImage: "folder.badge.plus")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.accentColor.opacity(0.15), in: .rect(cornerRadius: 12))
-        }
-        .accessibilityHint("Abre el selector de archivos para escoger un audio del dispositivo.")
-    }
-
     private var errorPresentado: Binding<Bool> {
         Binding(
             get: { mensajeError != nil },
@@ -152,24 +135,10 @@ struct PlayerView: View {
         }
     }
 
-    private func cargarAudioInicial() {
+    private func cargarCancion() {
         do {
-            try motor.cargarAudioDelBundle(nombre: "Ansioso", extensión: "m4a")
+            try motor.cargarAudioDelSandbox(nombreArchivo: cancion.nombreArchivo)
         } catch {
-            mensajeError = error.localizedDescription
-        }
-    }
-
-    private func gestionarSeleccionArchivo(_ resultado: Result<[URL], Error>) {
-        switch resultado {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            do {
-                try motor.cargarAudioDeURL(url)
-            } catch {
-                mensajeError = error.localizedDescription
-            }
-        case .failure(let error):
             mensajeError = error.localizedDescription
         }
     }
@@ -186,8 +155,4 @@ struct PlayerView: View {
         let segs = total % 60
         return String(format: "%d:%02d", minutos, segs)
     }
-}
-
-#Preview {
-    PlayerView()
 }

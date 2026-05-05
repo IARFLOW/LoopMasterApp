@@ -6,7 +6,9 @@ struct LoopMasterApp: App {
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Cancion.self
+            Cancion.self,
+            Carpeta.self,
+            Bucle.self
         ])
         let configuracion = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

@@ -29,33 +29,29 @@ final class AudioEngineManager {
     }
 
     init() {
+        configurarSesionAudio()
         engine.attach(playerNode)
         engine.attach(timePitch)
         engine.connect(playerNode, to: timePitch, format: nil)
         engine.connect(timePitch, to: engine.mainMixerNode, format: nil)
     }
 
-    func cargarAudioDelBundle(nombre: String, extensión: String) throws {
-        detener()
-
-        guard let url = Bundle.main.url(forResource: nombre, withExtension: extensión) else {
-            throw ErrorAudio.archivoNoEncontrado(nombre: "\(nombre).\(extensión)")
+    private func configurarSesionAudio() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("AudioEngineManager: no se pudo configurar AVAudioSession: \(error)")
         }
-
-        try cargarArchivo(desde: url, nombreVisible: "\(nombre).\(extensión)")
     }
 
-    func cargarAudioDeURL(_ url: URL) throws {
+    func cargarAudioDelSandbox(nombreArchivo: String) throws {
         detener()
-
-        let necesitaScope = url.startAccessingSecurityScopedResource()
-        defer {
-            if necesitaScope {
-                url.stopAccessingSecurityScopedResource()
-            }
+        let url = BibliotecaAudio.urlEnSandbox(nombreArchivo: nombreArchivo)
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else {
+            throw ErrorAudio.archivoNoEncontrado(nombre: nombreArchivo)
         }
-
-        try cargarArchivo(desde: url, nombreVisible: url.lastPathComponent)
+        try cargarArchivo(desde: url, nombreVisible: nombreArchivo)
     }
 
     private func cargarArchivo(desde url: URL, nombreVisible: String) throws {
@@ -106,7 +102,7 @@ final class AudioEngineManager {
         var errorDescription: String? {
             switch self {
             case .archivoNoEncontrado(let nombre):
-                return "No se encontró el archivo de audio '\(nombre)' en el bundle."
+                return "No se encontró el archivo de audio '\(nombre)'."
             case .archivoNoCargado:
                 return "No hay ningún archivo de audio cargado en el reproductor."
             }

@@ -9,6 +9,11 @@ final class Cancion {
     var nombreArchivo: String
     var fechaCreacion: Date
 
+    @Relationship(deleteRule: .cascade, inverse: \Bucle.cancion)
+    var bucles: [Bucle] = []
+
+    var carpetas: [Carpeta] = []
+
     init(
         titulo: String,
         artista: String = "",
