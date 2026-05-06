@@ -1,6 +1,6 @@
 import Foundation
 
-struct BucleDTO: Codable {
+nonisolated struct BucleDTO: Codable, Sendable {
     var id: Int?
     var nombre: String
     var puntoASegundos: Double

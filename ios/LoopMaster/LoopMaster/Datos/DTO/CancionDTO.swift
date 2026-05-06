@@ -1,6 +1,6 @@
 import Foundation
 
-struct CancionDTO: Codable {
+nonisolated struct CancionDTO: Codable, Sendable {
     var id: Int?
     var titulo: String
     var artista: String
