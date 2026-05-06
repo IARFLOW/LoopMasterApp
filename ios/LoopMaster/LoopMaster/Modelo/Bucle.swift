@@ -10,6 +10,10 @@ final class Bucle {
     var tonoSemitonos: Float
     var fechaCreacion: Date
 
+    var idServidor: Int?
+    var pendienteSync: Bool = false
+    var pendienteBorrado: Bool = false
+
     var cancion: Cancion?
 
     init(
@@ -17,7 +21,10 @@ final class Bucle {
         puntoASegundos: Double,
         puntoBSegundos: Double,
         velocidadPorcentaje: Float = 100,
-        tonoSemitonos: Float = 0
+        tonoSemitonos: Float = 0,
+        idServidor: Int? = nil,
+        pendienteSync: Bool = false,
+        pendienteBorrado: Bool = false
     ) {
         self.nombre = nombre
         self.puntoASegundos = puntoASegundos
@@ -25,5 +32,8 @@ final class Bucle {
         self.velocidadPorcentaje = velocidadPorcentaje
         self.tonoSemitonos = tonoSemitonos
         self.fechaCreacion = Date()
+        self.idServidor = idServidor
+        self.pendienteSync = pendienteSync
+        self.pendienteBorrado = pendienteBorrado
     }
 }
