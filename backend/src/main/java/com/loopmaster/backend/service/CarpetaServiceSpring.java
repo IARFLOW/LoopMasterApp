@@ -27,12 +27,14 @@ public class CarpetaServiceSpring implements CarpetaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CarpetaDTO> listarTodas() {
         List<Carpeta> carpetas = this.carpetaDAO.findAll();
         return carpetas.stream().map(this::mapearADTO).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<CarpetaDTO> buscarPorId(int id) {
         Optional<Carpeta> existente = this.carpetaDAO.findById(id);
         if (existente.isPresent()) {
@@ -42,6 +44,7 @@ public class CarpetaServiceSpring implements CarpetaService {
     }
 
     @Override
+    @Transactional
     public CarpetaDTO crear(CarpetaDTO datos) {
         Carpeta entidad = new Carpeta();
         entidad.setNombre(datos.getNombre());
@@ -51,6 +54,7 @@ public class CarpetaServiceSpring implements CarpetaService {
     }
 
     @Override
+    @Transactional
     public Optional<CarpetaDTO> actualizar(int id, CarpetaDTO datos) {
         Optional<Carpeta> existente = this.carpetaDAO.findById(id);
         if (existente.isPresent()) {

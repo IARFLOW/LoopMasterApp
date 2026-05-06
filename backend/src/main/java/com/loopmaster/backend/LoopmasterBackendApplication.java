@@ -65,8 +65,8 @@ public class LoopmasterBackendApplication implements CommandLineRunner {
 
 		Bucle estribillo = new Bucle();
 		estribillo.setNombre("Estribillo");
-		estribillo.setPuntoASegundos(45);
-		estribillo.setPuntoBSegundos(75);
+		estribillo.setPuntoASegundos(45.3);
+		estribillo.setPuntoBSegundos(75.8);
 		estribillo.setVelocidad(80);
 		estribillo.setTonoSemitonos(0);
 		estribillo.setCancion(ansioso);
@@ -74,8 +74,8 @@ public class LoopmasterBackendApplication implements CommandLineRunner {
 
 		Bucle solo = new Bucle();
 		solo.setNombre("Solo de batería");
-		solo.setPuntoASegundos(120);
-		solo.setPuntoBSegundos(150);
+		solo.setPuntoASegundos(120.5);
+		solo.setPuntoBSegundos(150.2);
 		solo.setVelocidad(100);
 		solo.setTonoSemitonos(0);
 		solo.setCancion(ansioso);

@@ -14,10 +14,10 @@ public class Bucle {
     private String nombre;
 
     @Column(name = "punto_a_segundos", nullable = false)
-    private int puntoASegundos;
+    private double puntoASegundos;
 
     @Column(name = "punto_b_segundos", nullable = false)
-    private int puntoBSegundos;
+    private double puntoBSegundos;
 
     @Column(name = "velocidad", nullable = false)
     private int velocidad;
@@ -34,7 +34,7 @@ public class Bucle {
         this.tonoSemitonos = 0;
     }
 
-    public Bucle(int id, String nombre, int puntoASegundos, int puntoBSegundos, Cancion cancion) {
+    public Bucle(int id, String nombre, double puntoASegundos, double puntoBSegundos, Cancion cancion) {
         this.id = id;
         this.nombre = nombre;
         this.puntoASegundos = puntoASegundos;
@@ -60,19 +60,19 @@ public class Bucle {
         this.nombre = nombre;
     }
 
-    public int getPuntoASegundos() {
+    public double getPuntoASegundos() {
         return puntoASegundos;
     }
 
-    public void setPuntoASegundos(int puntoASegundos) {
+    public void setPuntoASegundos(double puntoASegundos) {
         this.puntoASegundos = puntoASegundos;
     }
 
-    public int getPuntoBSegundos() {
+    public double getPuntoBSegundos() {
         return puntoBSegundos;
     }
 
-    public void setPuntoBSegundos(int puntoBSegundos) {
+    public void setPuntoBSegundos(double puntoBSegundos) {
         this.puntoBSegundos = puntoBSegundos;
     }
 

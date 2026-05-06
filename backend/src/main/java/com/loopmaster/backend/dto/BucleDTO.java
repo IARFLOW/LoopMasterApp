@@ -4,8 +4,8 @@ public class BucleDTO {
 
     private int id;
     private String nombre;
-    private int puntoASegundos;
-    private int puntoBSegundos;
+    private double puntoASegundos;
+    private double puntoBSegundos;
     private int velocidad;
     private int tonoSemitonos;
     private int cancionId;
@@ -13,7 +13,7 @@ public class BucleDTO {
     public BucleDTO() {
     }
 
-    public BucleDTO(int id, String nombre, int puntoASegundos, int puntoBSegundos, int velocidad, int tonoSemitonos, int cancionId) {
+    public BucleDTO(int id, String nombre, double puntoASegundos, double puntoBSegundos, int velocidad, int tonoSemitonos, int cancionId) {
         this.id = id;
         this.nombre = nombre;
         this.puntoASegundos = puntoASegundos;
@@ -39,19 +39,19 @@ public class BucleDTO {
         this.nombre = nombre;
     }
 
-    public int getPuntoASegundos() {
+    public double getPuntoASegundos() {
         return puntoASegundos;
     }
 
-    public void setPuntoASegundos(int puntoASegundos) {
+    public void setPuntoASegundos(double puntoASegundos) {
         this.puntoASegundos = puntoASegundos;
     }
 
-    public int getPuntoBSegundos() {
+    public double getPuntoBSegundos() {
         return puntoBSegundos;
     }
 
-    public void setPuntoBSegundos(int puntoBSegundos) {
+    public void setPuntoBSegundos(double puntoBSegundos) {
         this.puntoBSegundos = puntoBSegundos;
     }
 
