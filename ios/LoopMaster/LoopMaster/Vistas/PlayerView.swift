@@ -78,9 +78,16 @@ struct PlayerView: View {
                 Text("Tempo")
                     .font(.headline)
                 Spacer()
-                Text("\(Int(motor.tempo)) %")
-                    .font(.headline.monospacedDigit())
-                    .foregroundStyle(.tint)
+                Button {
+                    withAnimation(.smooth) { motor.tempo = 100 }
+                } label: {
+                    Text("\(Int(motor.tempo)) %")
+                        .font(.headline.monospacedDigit())
+                        .foregroundStyle(.tint)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Tempo actual: \(Int(motor.tempo)) por ciento")
+                .accessibilityHint("Toca para volver al tempo original")
             }
             Slider(value: Binding(
                 get: { Double(motor.tempo) },
@@ -100,9 +107,16 @@ struct PlayerView: View {
                 Text("Tono")
                     .font(.headline)
                 Spacer()
-                Text(formateoSemitonos(motor.pitchSemitonos))
-                    .font(.headline.monospacedDigit())
-                    .foregroundStyle(.tint)
+                Button {
+                    withAnimation(.smooth) { motor.pitchSemitonos = 0 }
+                } label: {
+                    Text(formateoSemitonos(motor.pitchSemitonos))
+                        .font(.headline.monospacedDigit())
+                        .foregroundStyle(.tint)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Tono actual: \(formateoSemitonos(motor.pitchSemitonos))")
+                .accessibilityHint("Toca para volver al tono original")
             }
             Slider(value: Binding(
                 get: { Double(motor.pitchSemitonos) },

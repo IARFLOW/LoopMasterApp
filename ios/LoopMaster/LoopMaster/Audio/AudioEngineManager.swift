@@ -18,6 +18,7 @@ final class AudioEngineManager {
     var tempo: Float = 100 {
         didSet {
             timePitch.rate = max(0.25, min(1.75, tempo / 100))
+            actualizarBypass()
         }
     }
 
@@ -25,6 +26,7 @@ final class AudioEngineManager {
         didSet {
             let acotado = max(-12, min(12, pitchSemitonos))
             timePitch.pitch = acotado * 100
+            actualizarBypass()
         }
     }
 
@@ -34,6 +36,13 @@ final class AudioEngineManager {
         engine.attach(timePitch)
         engine.connect(playerNode, to: timePitch, format: nil)
         engine.connect(timePitch, to: engine.mainMixerNode, format: nil)
+        actualizarBypass()
+    }
+
+    private func actualizarBypass() {
+        let rateNeutral = abs(timePitch.rate - 1.0) < 0.005
+        let pitchNeutral = abs(timePitch.pitch) < 1.0
+        timePitch.bypass = rateNeutral && pitchNeutral
     }
 
     private func configurarSesionAudio() {
