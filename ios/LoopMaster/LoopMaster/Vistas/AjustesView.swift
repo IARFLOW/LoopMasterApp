@@ -9,8 +9,10 @@ struct AjustesView: View {
         Form {
             Section {
                 TextField("URL del backend", text: $baseURLBackend)
+                    #if os(iOS)
                     .keyboardType(.URL)
                     .textInputAutocapitalization(.never)
+                    #endif
                     .autocorrectionDisabled()
                     .font(.body.monospaced())
             } header: {
@@ -50,8 +52,13 @@ struct AjustesView: View {
                     }
                 }
             }
+
         }
         .navigationTitle("Ajustes")
+        #if os(macOS)
+        .formStyle(.grouped)
+        .padding()
+        #endif
     }
 
     private func probarConexion() {

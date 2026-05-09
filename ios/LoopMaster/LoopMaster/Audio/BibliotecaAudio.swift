@@ -7,6 +7,10 @@ enum BibliotecaAudio {
         directorioCanciones().appending(path: nombreArchivo)
     }
 
+    static func urlOndaEnSandbox(nombreArchivo: String) -> URL {
+        directorioOndas().appending(path: nombreOndaPara(nombreArchivo: nombreArchivo))
+    }
+
     static func importarArchivo(desde origen: URL) throws -> ArchivoImportado {
         let necesitaScope = origen.startAccessingSecurityScopedResource()
         defer {
@@ -51,8 +55,43 @@ enum BibliotecaAudio {
         return ArchivoImportado(nombreArchivo: nombreCompleto, duracionSegundos: duracion)
     }
 
+    static func guardarOnda(_ muestras: [Float], paraNombre nombreArchivo: String) throws {
+        let directorio = directorioOndas()
+        try crearDirectorioSiHaceFalta(directorio)
+        let url = urlOndaEnSandbox(nombreArchivo: nombreArchivo)
+        let archivo = ArchivoOndaPersistido(version: 9, muestras: muestras)
+        let datos = try JSONEncoder().encode(archivo)
+        try datos.write(to: url, options: .atomic)
+    }
+
+    static func leerOnda(paraNombre nombreArchivo: String) -> [Float]? {
+        let url = urlOndaEnSandbox(nombreArchivo: nombreArchivo)
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)),
+              let datos = try? Data(contentsOf: url),
+              let archivo = try? JSONDecoder().decode(ArchivoOndaPersistido.self, from: datos),
+              archivo.version == 9 else {
+            return nil
+        }
+        return archivo.muestras
+    }
+
+    static func borrarOnda(paraNombre nombreArchivo: String) {
+        let url = urlOndaEnSandbox(nombreArchivo: nombreArchivo)
+        try? FileManager.default.removeItem(at: url)
+    }
+
     private static func directorioCanciones() -> URL {
         URL.documentsDirectory.appending(path: "Canciones", directoryHint: .isDirectory)
+    }
+
+    private static func directorioOndas() -> URL {
+        URL.documentsDirectory.appending(path: "Ondas", directoryHint: .isDirectory)
+    }
+
+    private static func nombreOndaPara(nombreArchivo: String) -> String {
+        let url = URL(fileURLWithPath: nombreArchivo)
+        let base = url.deletingPathExtension().lastPathComponent
+        return "\(base).json"
     }
 
     private static func crearDirectorioSiHaceFalta(_ url: URL) throws {
@@ -97,4 +136,9 @@ enum BibliotecaAudio {
 struct ArchivoImportado: Sendable {
     let nombreArchivo: String
     let duracionSegundos: Int
+}
+
+private struct ArchivoOndaPersistido: Codable {
+    let version: Int
+    let muestras: [Float]
 }

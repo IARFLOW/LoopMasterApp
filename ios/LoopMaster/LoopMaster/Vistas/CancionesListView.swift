@@ -50,11 +50,14 @@ struct CancionesListView: View {
                 NavigationStack {
                     AjustesView()
                         .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
+                            ToolbarItem(placement: .confirmationAction) {
                                 Button("Hecho") { mostrandoAjustes = false }
                             }
                         }
                 }
+                #if os(macOS)
+                .frame(minWidth: 480, minHeight: 360)
+                #endif
             }
             .alert("Error", isPresented: errorPresentado) {
                 Button("OK", role: .cancel) { mensajeError = nil }
@@ -79,14 +82,14 @@ struct CancionesListView: View {
 
     @ToolbarContentBuilder
     private var contenidoToolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
+        ToolbarItem(placement: placementLeading) {
             Button {
                 mostrandoAjustes = true
             } label: {
                 Label("Ajustes", systemImage: "gear")
             }
         }
-        ToolbarItem(placement: .topBarTrailing) {
+        ToolbarItem(placement: placementTrailingPrincipal) {
             Button {
                 Task { await repositorio.sincronizar() }
             } label: {
@@ -119,6 +122,31 @@ struct CancionesListView: View {
     }
 
     private var listaCanciones: some View {
+        #if os(macOS)
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(Array(canciones.enumerated()), id: \.element.id) { indice, cancion in
+                    NavigationLink(value: cancion) {
+                        filaCancion(cancion)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    if indice < canciones.count - 1 {
+                        Divider()
+                            .padding(.leading, 16)
+                    }
+                }
+            }
+            .background(Color(white: 0.12))
+            .clipShape(.rect(cornerRadius: 14))
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        #else
         List {
             ForEach(canciones) { cancion in
                 NavigationLink(value: cancion) {
@@ -127,13 +155,19 @@ struct CancionesListView: View {
             }
             .onDelete(perform: borrarCanciones)
         }
+        #endif
     }
 
     private func filaCancion(_ cancion: Cancion) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cancion.titulo)
                     .font(.headline)
+                if !cancion.artista.isEmpty {
+                    Text(cancion.artista)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 HStack(spacing: 8) {
                     Text(formateoDuracion(cancion.duracionSegundos))
                     if !cancion.bucles.isEmpty {
@@ -150,8 +184,14 @@ struct CancionesListView: View {
                     .foregroundStyle(.secondary)
                     .accessibilityLabel("Pendiente de subir al servidor")
             }
+            #if os(macOS)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
+            #endif
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
+        .contentShape(Rectangle())
     }
 
     private func bannerResultado(_ resultado: ResultadoRepositorio) -> some View {
@@ -181,6 +221,22 @@ struct CancionesListView: View {
             get: { mensajeError != nil },
             set: { if !$0 { mensajeError = nil } }
         )
+    }
+
+    private var placementLeading: ToolbarItemPlacement {
+        #if os(iOS)
+        return .topBarLeading
+        #else
+        return .navigation
+        #endif
+    }
+
+    private var placementTrailingPrincipal: ToolbarItemPlacement {
+        #if os(iOS)
+        return .topBarTrailing
+        #else
+        return .automatic
+        #endif
     }
 
     private func gestionarSeleccionArchivo(_ resultado: Result<[URL], Error>) {
