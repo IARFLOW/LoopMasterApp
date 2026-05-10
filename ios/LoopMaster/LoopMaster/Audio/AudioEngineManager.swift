@@ -15,10 +15,11 @@ final class AudioEngineManager {
     private(set) var nombreArchivoCargado: String = ""
 
     private(set) var posicionSegundos: Double = 0
+    private var posicionAnterior: Double = 0
     private var offsetSegundos: Double = 0
     private var tieneSegmentoSchedulado: Bool = false
     private var tokenScheduling: Int = 0
-    private var timerActualizacion: Timer?
+    private var timerActualizacion: DispatchSourceTimer?
 
     private var sampleTimeReferencia: AVAudioFramePosition?
     private var sampleRateOutput: Double = 44100
@@ -60,6 +61,9 @@ final class AudioEngineManager {
         }
     }
 
+    var bucle: RangoBucle?
+    var loopActivo: Bool = false
+
     init() {
         configurarSesionAudio()
         engine.attach(playerNode)
@@ -92,6 +96,7 @@ final class AudioEngineManager {
         try cargarArchivo(desde: url, nombreVisible: nombreArchivo)
         offsetSegundos = 0
         posicionSegundos = 0
+        posicionAnterior = 0
         tieneSegmentoSchedulado = false
     }
 
@@ -191,7 +196,7 @@ final class AudioEngineManager {
         playerNode.pause()
         reproduciendo = false
         sampleTimeReferencia = nil
-        timerActualizacion?.invalidate()
+        timerActualizacion?.cancel()
         timerActualizacion = nil
     }
 
@@ -202,8 +207,9 @@ final class AudioEngineManager {
         tieneSegmentoSchedulado = false
         offsetSegundos = 0
         posicionSegundos = 0
+        posicionAnterior = 0
         sampleTimeReferencia = nil
-        timerActualizacion?.invalidate()
+        timerActualizacion?.cancel()
         timerActualizacion = nil
     }
 
@@ -218,7 +224,7 @@ final class AudioEngineManager {
         playerNode.stop()
         reproduciendo = false
         sampleTimeReferencia = nil
-        timerActualizacion?.invalidate()
+        timerActualizacion?.cancel()
         timerActualizacion = nil
 
         let frecuencia = archivo.processingFormat.sampleRate
@@ -227,6 +233,7 @@ final class AudioEngineManager {
 
         offsetSegundos = segundoLimitado
         posicionSegundos = segundoLimitado
+        posicionAnterior = segundoLimitado
         tieneSegmentoSchedulado = false
 
         guard framesRestantes > 0 else { return }
@@ -264,18 +271,22 @@ final class AudioEngineManager {
     private func alFinalizarReproduccion() {
         reproduciendo = false
         tieneSegmentoSchedulado = false
-        timerActualizacion?.invalidate()
+        timerActualizacion?.cancel()
         timerActualizacion = nil
         posicionSegundos = duracionSegundos
     }
 
     private func iniciarTimer() {
-        timerActualizacion?.invalidate()
-        timerActualizacion = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+        timerActualizacion?.cancel()
+        let nuevoTimer = DispatchSource.makeTimerSource(queue: .main)
+        nuevoTimer.schedule(deadline: .now() + 1.0 / 30.0, repeating: 1.0 / 30.0)
+        nuevoTimer.setEventHandler { [weak self] in
             MainActor.assumeIsolated {
                 self?.refrescarPosicion()
             }
         }
+        nuevoTimer.resume()
+        timerActualizacion = nuevoTimer
     }
 
     private func capturarReferenciaRender() {
@@ -311,12 +322,26 @@ final class AudioEngineManager {
             guard sampleTimeReferencia != nil else { return }
         }
         guard let segundosArchivo = segundosArchivoDesdeReferencia() else { return }
-        posicionSegundos = min(duracionSegundos, max(0, offsetSegundos + segundosArchivo))
+        let nuevaPosicion = min(duracionSegundos, max(0, offsetSegundos + segundosArchivo))
+        if loopActivo, let rango = bucle, rango.fin > rango.inicio {
+            let antesDentro = posicionAnterior >= rango.inicio && posicionAnterior < rango.fin
+            if antesDentro && nuevaPosicion >= rango.fin {
+                saltarA(segundo: rango.inicio)
+                return
+            }
+        }
+        posicionAnterior = nuevaPosicion
+        posicionSegundos = nuevaPosicion
     }
 
     private func consolidarOffsetConRateActual() {
         guard let segundosArchivo = segundosArchivoDesdeReferencia() else { return }
         offsetSegundos = min(duracionSegundos, max(0, offsetSegundos + segundosArchivo))
+    }
+
+    struct RangoBucle: Sendable, Equatable {
+        var inicio: Double
+        var fin: Double
     }
 
     enum ErrorAudio: Error, LocalizedError {

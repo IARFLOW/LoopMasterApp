@@ -141,7 +141,7 @@ struct CancionesListView: View {
                     }
                 }
             }
-            .background(Color(white: 0.12))
+            .background(Color(NSColor.controlBackgroundColor))
             .clipShape(.rect(cornerRadius: 14))
             .padding(.horizontal, 16)
             .padding(.top, 8)
