@@ -6,6 +6,7 @@ struct CancionesListView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(LoopMasterRepository.self) private var repositorio
+    @Environment(\.colorScheme) private var colorScheme
     @Query(
         filter: #Predicate<Cancion> { !$0.pendienteBorrado },
         sort: \Cancion.fechaCreacion,
@@ -16,6 +17,20 @@ struct CancionesListView: View {
     @State private var mostrandoAjustes = false
     @State private var mensajeError: String?
     @State private var tareaCierreBanner: Task<Void, Never>?
+
+    #if os(macOS)
+    private var colorFondoAgrupado: Color {
+        colorScheme == .dark
+            ? Color.black
+            : Color(red: 242/255, green: 242/255, blue: 247/255)
+    }
+
+    private var colorContenedorAgrupado: Color {
+        colorScheme == .dark
+            ? Color(red: 28/255, green: 28/255, blue: 30/255)
+            : Color.white
+    }
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -73,7 +88,6 @@ struct CancionesListView: View {
                         try await Task.sleep(for: .seconds(4))
                         repositorio.ultimoResultado = nil
                     } catch {
-                        // cancelada antes de tiempo
                     }
                 }
             }
@@ -141,11 +155,14 @@ struct CancionesListView: View {
                     }
                 }
             }
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(colorContenedorAgrupado)
             .clipShape(.rect(cornerRadius: 14))
             .padding(.horizontal, 16)
             .padding(.top, 8)
+            .padding(.bottom, 16)
         }
+        .scrollContentBackground(.hidden)
+        .background(colorFondoAgrupado)
         #else
         List {
             ForEach(canciones) { cancion in

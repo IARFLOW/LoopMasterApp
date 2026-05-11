@@ -8,6 +8,7 @@ struct BucleListView: View {
 
     @Environment(LoopMasterRepository.self) private var repositorio
     @Query private var bucles: [Bucle]
+    @State private var bucleAAjustar: Bucle?
 
     init(cancion: Cancion, aplicar: @escaping (Bucle) -> Void) {
         self.cancion = cancion
@@ -34,6 +35,19 @@ struct BucleListView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        .sheet(item: $bucleAAjustar) { bucle in
+            AjustarBucleView(
+                titulo: bucle.nombre,
+                duracion: Double(cancion.duracionSegundos),
+                puntoAInicial: bucle.puntoASegundos,
+                puntoBInicial: bucle.puntoBSegundos,
+                onCambio: { nuevoA, nuevoB in
+                    bucle.puntoASegundos = nuevoA
+                    bucle.puntoBSegundos = nuevoB
+                    bucle.pendienteSync = true
+                }
+            )
+        }
     }
 
     private var estadoVacio: some View {
@@ -53,6 +67,14 @@ struct BucleListView: View {
                     filaBucle(bucle)
                 }
                 .buttonStyle(.plain)
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    Button {
+                        bucleAAjustar = bucle
+                    } label: {
+                        Label("Ajustar", systemImage: "slider.horizontal.below.rectangle")
+                    }
+                    .tint(.accentColor)
+                }
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
                         repositorio.marcarParaBorrar(bucle)
@@ -61,6 +83,11 @@ struct BucleListView: View {
                     }
                 }
                 .contextMenu {
+                    Button {
+                        bucleAAjustar = bucle
+                    } label: {
+                        Label("Ajustar bucle", systemImage: "slider.horizontal.below.rectangle")
+                    }
                     Button(role: .destructive) {
                         repositorio.marcarParaBorrar(bucle)
                     } label: {

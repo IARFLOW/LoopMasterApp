@@ -21,11 +21,13 @@ struct PlayerView: View {
     @State private var puntoB: Double?
     @State private var loopActivo: Bool = false
     @State private var mostrandoBuclesGuardados: Bool = false
+    @State private var mostrandoAjustarBucle: Bool = false
     @State private var nombreBucleNuevo: String = ""
     @State private var pidiendoNombreBucle: Bool = false
     @State private var nivelZoom: Int = 5
     @State private var mostrandoTiempoRestante: Bool = true
     @State private var mostrandoVolumen: Bool = false
+    @State private var mostrandoMenuZoom: Bool = false
 
     private static let zoomPorNivel: [Double] = [1, 2, 3, 5, 7, 10, 15, 25, 40, 70, 120]
 
@@ -38,11 +40,26 @@ struct PlayerView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     #endif
 
+    #if os(macOS)
+    @Environment(\.colorScheme) private var colorScheme
+    private var colorFondoPlayer: Color {
+        colorScheme == .dark ? Color.black : Color.white
+    }
+    #endif
+
     private var esCompacto: Bool {
         #if os(iOS)
         return verticalSizeClass == .compact
         #else
         return false
+        #endif
+    }
+
+    private var mostrarBotonAjustar: Bool {
+        #if os(macOS)
+        return true
+        #else
+        return esCompacto
         #endif
     }
 
@@ -134,6 +151,12 @@ struct PlayerView: View {
         .safeAreaInset(edge: .bottom) {
             controlesFijos
         }
+        #if os(macOS)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(colorFondoPlayer)
+        .toolbarBackground(colorFondoPlayer, for: .windowToolbar)
+        .toolbarBackground(.visible, for: .windowToolbar)
+        #endif
         .navigationTitle(cancion.titulo)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
@@ -194,6 +217,21 @@ struct PlayerView: View {
             #if os(macOS)
             .frame(minWidth: 480, minHeight: 360)
             #endif
+        }
+        .sheet(isPresented: $mostrandoAjustarBucle) {
+            AjustarBucleView(
+                duracion: motor.duracionSegundos,
+                puntoAInicial: puntoA ?? 0,
+                puntoBInicial: puntoB ?? motor.duracionSegundos,
+                muestrasOnda: muestrasOnda,
+                motor: motor,
+                onCambio: { nuevoA, nuevoB in
+                    puntoA = nuevoA
+                    puntoB = nuevoB
+                    loopActivo = true
+                    actualizarMotorBucle()
+                }
+            )
         }
     }
 
@@ -356,6 +394,20 @@ struct PlayerView: View {
 
             botonVolumen
 
+            if mostrarBotonAjustar {
+                Button {
+                    mostrandoAjustarBucle = true
+                } label: {
+                    Image(systemName: "slider.horizontal.below.rectangle")
+                        .font(.system(size: 26))
+                        .foregroundStyle(hayAlgunPunto ? Color.accentColor : Color.secondary)
+                        .frame(width: 36, height: 36)
+                }
+                .buttonStyle(.plain)
+                .disabled(!hayAlgunPunto)
+                .accessibilityLabel("Ajustar bucle con precisión")
+            }
+
             Button {
                 limpiarBucle()
             } label: {
@@ -368,32 +420,7 @@ struct PlayerView: View {
             .disabled(!hayAlgunPunto)
             .accessibilityLabel("Quitar bucle")
 
-            Menu {
-                ForEach(0..<Self.zoomPorNivel.count, id: \.self) { nivel in
-                    Button {
-                        nivelZoom = nivel
-                    } label: {
-                        if nivel == nivelZoom {
-                            Label("Nivel \(nivel)", systemImage: "checkmark")
-                        } else {
-                            Text("Nivel \(nivel)")
-                        }
-                    }
-                }
-                Divider()
-                Button {
-                    nivelZoom = 5
-                } label: {
-                    Label("Reset (nivel 5)", systemImage: "arrow.counterclockwise")
-                }
-            } label: {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 26))
-                    .foregroundStyle(.tint)
-                    .frame(width: 36, height: 36)
-            }
-            .menuOrder(.fixed)
-            .accessibilityLabel("Nivel de zoom de la onda. Actual: nivel \(nivelZoom)")
+            botonZoom
 
             Button {
                 pidiendoNombreBucle = true
@@ -441,6 +468,88 @@ struct PlayerView: View {
         return "speaker.wave.3.fill"
     }
 
+    @ViewBuilder
+    private var botonZoom: some View {
+        #if os(macOS)
+        Button {
+            mostrandoMenuZoom.toggle()
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 26))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 36, height: 36)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Nivel de zoom de la onda. Actual: nivel \(nivelZoom)")
+        .popover(isPresented: $mostrandoMenuZoom, arrowEdge: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(0..<Self.zoomPorNivel.count, id: \.self) { nivel in
+                    Button {
+                        nivelZoom = nivel
+                        mostrandoMenuZoom = false
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: nivel == nivelZoom ? "checkmark" : "")
+                                .frame(width: 16)
+                            Text("Nivel \(nivel)")
+                            Spacer(minLength: 12)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Divider().padding(.vertical, 4)
+                Button {
+                    nivelZoom = 5
+                    mostrandoMenuZoom = false
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.counterclockwise").frame(width: 16)
+                        Text("Reset (nivel 5)")
+                        Spacer(minLength: 12)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.vertical, 8)
+            .frame(minWidth: 180)
+        }
+        #else
+        Menu {
+            ForEach(0..<Self.zoomPorNivel.count, id: \.self) { nivel in
+                Button {
+                    nivelZoom = nivel
+                } label: {
+                    if nivel == nivelZoom {
+                        Label("Nivel \(nivel)", systemImage: "checkmark")
+                    } else {
+                        Text("Nivel \(nivel)")
+                    }
+                }
+            }
+            Divider()
+            Button {
+                nivelZoom = 5
+            } label: {
+                Label("Reset (nivel 5)", systemImage: "arrow.counterclockwise")
+            }
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 26))
+                .foregroundStyle(.tint)
+                .frame(width: 36, height: 36)
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Nivel de zoom de la onda. Actual: nivel \(nivelZoom)")
+        #endif
+    }
+
     private func botonMarcaPunto(
         etiqueta: String,
         marcado: Bool,
@@ -456,6 +565,15 @@ struct PlayerView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Marcar punto \(etiqueta) en la posición actual")
+        .accessibilityHint("Mantén pulsado para ajustar con precisión")
+        .contextMenu {
+            Button {
+                mostrandoAjustarBucle = true
+            } label: {
+                Label("Ajustar bucle con precisión", systemImage: "slider.horizontal.below.rectangle")
+            }
+            .disabled(!hayAlgunPunto)
+        }
     }
 
     private var hayBucleValido: Bool {
@@ -483,7 +601,7 @@ struct PlayerView: View {
                     .font(.system(size: 22))
                     .foregroundStyle(.tint)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(EscalaPulsadaButtonStyle())
             .accessibilityLabel(loopActivo ? "Ir al punto A" : "Ir al principio")
 
             Button {
@@ -493,18 +611,22 @@ struct PlayerView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(.tint)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(EscalaPulsadaButtonStyle())
             .accessibilityLabel("Retroceder 5 segundos")
 
             Button {
                 alternarReproduccion()
             } label: {
-                Image(systemName: motor.reproduciendo ? "pause.fill" : "play.fill")
-                    .font(.system(size: 36))
+                Image(systemName: motor.reproduciendo ? "pause.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 64, weight: .regular))
                     .foregroundStyle(.tint)
+                    .contentTransition(.symbolEffect(.replace))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(EscalaPulsadaButtonStyle(escalaPulsada: 0.82))
             .keyboardShortcut(.space, modifiers: [])
+            #if os(iOS)
+            .sensoryFeedback(.impact(weight: .medium), trigger: motor.reproduciendo)
+            #endif
             .accessibilityLabel(motor.reproduciendo ? "Pausar" : "Reproducir")
 
             Button {
@@ -514,7 +636,7 @@ struct PlayerView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(.tint)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(EscalaPulsadaButtonStyle())
             .accessibilityLabel("Avanzar 5 segundos")
 
             Button {
@@ -524,7 +646,7 @@ struct PlayerView: View {
                     .font(.system(size: 22))
                     .foregroundStyle(.tint)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(EscalaPulsadaButtonStyle())
             .accessibilityLabel(loopActivo ? "Ir al punto B" : "Ir al final")
         }
     }
@@ -768,6 +890,17 @@ struct PlayerView: View {
         if mejorIndice != nivelZoom {
             nivelZoom = mejorIndice
         }
+    }
+}
+
+private struct EscalaPulsadaButtonStyle: ButtonStyle {
+
+    var escalaPulsada: CGFloat = 0.88
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? escalaPulsada : 1.0)
+            .animation(.spring(response: 0.25, dampingFraction: 0.55), value: configuration.isPressed)
     }
 }
 
