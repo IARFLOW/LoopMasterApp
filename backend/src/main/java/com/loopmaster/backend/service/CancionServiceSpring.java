@@ -1,11 +1,14 @@
 package com.loopmaster.backend.service;
 
 import com.loopmaster.backend.dto.CancionDTO;
+import com.loopmaster.backend.dto.CancionResumenDTO;
 import com.loopmaster.backend.model.Cancion;
 import com.loopmaster.backend.repository.CancionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,6 +70,44 @@ public class CancionServiceSpring implements CancionService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CancionResumenDTO> resumenConMinBucles(long minBucles) {
+        List<Object[]> filas = this.cancionDAO.resumenConMinBucles(minBucles);
+        List<CancionResumenDTO> resultado = new ArrayList<>();
+        for (Object[] fila : filas) {
+            resultado.add(mapearFilaResumen(fila));
+        }
+        return resultado;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CancionResumenDTO> conMasBuclesQueMedia() {
+        List<Long> conteos = this.cancionDAO.conteosBuclesPorCancion();
+        if (conteos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        long suma = 0;
+        for (Long n : conteos) {
+            suma += n;
+        }
+        double media = (double) suma / conteos.size();
+        long umbral = (long) Math.floor(media) + 1;
+        return resumenConMinBucles(umbral);
+    }
+
+    private CancionResumenDTO mapearFilaResumen(Object[] fila) {
+        CancionResumenDTO dto = new CancionResumenDTO();
+        dto.setId((Integer) fila[0]);
+        dto.setTitulo((String) fila[1]);
+        dto.setArtista((String) fila[2]);
+        dto.setCantidadBucles(((Long) fila[3]).intValue());
+        Double mediaSegundos = (Double) fila[4];
+        dto.setDuracionMediaBuclesSegundos(mediaSegundos != null ? mediaSegundos : 0.0);
+        return dto;
     }
 
     private CancionDTO mapearADTO(Cancion c) {

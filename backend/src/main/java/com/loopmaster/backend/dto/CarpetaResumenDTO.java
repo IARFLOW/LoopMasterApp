@@ -1,18 +1,16 @@
 package com.loopmaster.backend.dto;
 
-public class CarpetaDTO {
+public class CarpetaResumenDTO {
 
     private int id;
     private String nombre;
-    private String descripcion;
     private int cantidadCanciones;
 
-    public CarpetaDTO() {
+    public CarpetaResumenDTO() {
     }
-    public CarpetaDTO(int id, String nombre, String descripcion, int cantidadCanciones) {
+    public CarpetaResumenDTO(int id, String nombre, int cantidadCanciones) {
         this.id = id;
         this.nombre = nombre;
-        this.descripcion = descripcion;
         this.cantidadCanciones = cantidadCanciones;
     }
 
@@ -28,12 +26,6 @@ public class CarpetaDTO {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    public String getDescripcion() {
-        return descripcion;
-    }
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
     public int getCantidadCanciones() {
         return cantidadCanciones;
     }
@@ -43,10 +35,9 @@ public class CarpetaDTO {
 
     @Override
     public String toString() {
-        return "CarpetaDTO{" +
+        return "CarpetaResumenDTO{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
-                ", descripcion='" + descripcion + '\'' +
                 ", cantidadCanciones=" + cantidadCanciones +
                 '}';
     }

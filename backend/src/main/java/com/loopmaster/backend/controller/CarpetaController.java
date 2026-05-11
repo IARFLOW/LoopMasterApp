@@ -2,6 +2,7 @@ package com.loopmaster.backend.controller;
 
 import com.loopmaster.backend.dto.CancionDTO;
 import com.loopmaster.backend.dto.CarpetaDTO;
+import com.loopmaster.backend.dto.CarpetaResumenDTO;
 import com.loopmaster.backend.service.CarpetaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -31,6 +33,13 @@ public class CarpetaController {
     public ResponseEntity<List<CarpetaDTO>> getCarpetas() {
         List<CarpetaDTO> carpetas = this.carpetaService.listarTodas();
         return ResponseEntity.ok(carpetas);
+    }
+
+    @GetMapping(value = "/resumen", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CarpetaResumenDTO>> getResumenCarpetas(
+            @RequestParam(name = "minCanciones", defaultValue = "0") long minCanciones) {
+        List<CarpetaResumenDTO> resumen = this.carpetaService.resumenConMinCanciones(minCanciones);
+        return ResponseEntity.ok(resumen);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -8,15 +8,10 @@ import java.util.Optional;
 public interface BucleService {
 
     List<BucleDTO> listarTodos();
-
     Optional<BucleDTO> buscarPorId(int id);
-
     Optional<BucleDTO> crear(BucleDTO datos);
-
     Optional<BucleDTO> actualizar(int id, BucleDTO datos);
-
     boolean eliminar(int id);
-
     Optional<List<BucleDTO>> buclesDeCancion(int cancionId);
 
 }

@@ -2,6 +2,7 @@ package com.loopmaster.backend.controller;
 
 import com.loopmaster.backend.dto.BucleDTO;
 import com.loopmaster.backend.dto.CancionDTO;
+import com.loopmaster.backend.dto.CancionResumenDTO;
 import com.loopmaster.backend.service.BucleService;
 import com.loopmaster.backend.service.CancionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -35,6 +37,19 @@ public class CancionController {
     public ResponseEntity<List<CancionDTO>> getCanciones() {
         List<CancionDTO> canciones = this.cancionService.listarTodas();
         return ResponseEntity.ok(canciones);
+    }
+
+    @GetMapping(value = "/resumen", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CancionResumenDTO>> getResumenCanciones(
+            @RequestParam(name = "minBucles", defaultValue = "0") long minBucles) {
+        List<CancionResumenDTO> resumen = this.cancionService.resumenConMinBucles(minBucles);
+        return ResponseEntity.ok(resumen);
+    }
+
+    @GetMapping(value = "/con-mas-bucles-que-media", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CancionResumenDTO>> getCancionesConMasBuclesQueMedia() {
+        List<CancionResumenDTO> resumen = this.cancionService.conMasBuclesQueMedia();
+        return ResponseEntity.ok(resumen);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

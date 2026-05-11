@@ -10,7 +10,6 @@ public class CancionDTO {
 
     public CancionDTO() {
     }
-
     public CancionDTO(int id, String titulo, String artista, int duracionSegundos, String nombreArchivo) {
         this.id = id;
         this.titulo = titulo;
@@ -22,39 +21,30 @@ public class CancionDTO {
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public String getTitulo() {
         return titulo;
     }
-
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
-
     public String getArtista() {
         return artista;
     }
-
     public void setArtista(String artista) {
         this.artista = artista;
     }
-
     public int getDuracionSegundos() {
         return duracionSegundos;
     }
-
     public void setDuracionSegundos(int duracionSegundos) {
         this.duracionSegundos = duracionSegundos;
     }
-
     public String getNombreArchivo() {
         return nombreArchivo;
     }
-
     public void setNombreArchivo(String nombreArchivo) {
         this.nombreArchivo = nombreArchivo;
     }

@@ -2,6 +2,7 @@ package com.loopmaster.backend.service;
 
 import com.loopmaster.backend.dto.CancionDTO;
 import com.loopmaster.backend.dto.CarpetaDTO;
+import com.loopmaster.backend.dto.CarpetaResumenDTO;
 import com.loopmaster.backend.model.Cancion;
 import com.loopmaster.backend.model.Carpeta;
 import com.loopmaster.backend.repository.CancionDAO;
@@ -114,6 +115,21 @@ public class CarpetaServiceSpring implements CarpetaService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CarpetaResumenDTO> resumenConMinCanciones(long minCanciones) {
+        List<Object[]> filas = this.carpetaDAO.resumenConMinCanciones(minCanciones);
+        List<CarpetaResumenDTO> resultado = new ArrayList<>();
+        for (Object[] fila : filas) {
+            CarpetaResumenDTO dto = new CarpetaResumenDTO();
+            dto.setId((Integer) fila[0]);
+            dto.setNombre((String) fila[1]);
+            dto.setCantidadCanciones(((Long) fila[2]).intValue());
+            resultado.add(dto);
+        }
+        return resultado;
     }
 
     private CarpetaDTO mapearADTO(Carpeta c) {
